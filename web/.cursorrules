@@ -1,0 +1,57 @@
+# brevly-web — regras do projeto (Cursor)
+
+## Visão geral
+
+Front-end React (SPA com **Vite**, sem framework meta) para gerenciar URLs encurtadas em conjunto com a API.
+
+## Stack obrigatória
+
+- **TypeScript**, **React**, **Vite** (sem Next/Remix etc.)
+- **Tailwind CSS** para estilos (mobile first)
+- Variáveis de ambiente documentadas em **`.env.example`**:
+  - `VITE_FRONTEND_URL=`
+  - `VITE_BACKEND_URL=`
+
+## Design system
+
+- Seguir o **Figma** o mais fielmente possível; começar pela aba **Style Guide** (tema, fontes, componentes).
+- **Open Sans** via Google Fonts (já referenciado no `index.html`).
+- Cores e tipografia do guia estão mapeadas em `src/index.css` via **`@theme`**:
+  - Cores: `bg-blue-base`, `text-gray-600`, etc.
+  - Tipografia Figma em `@theme`: `text-xl`, `text-lg`, `text-md`, `text-sm`, `text-xs` (só tamanho/entrelinha). **Peso e caixa alta em classes separadas** — ex.: `className="text-md font-semibold"`, `className="text-xl font-bold"`, `className="text-xs font-normal uppercase"`.
+
+## Funcionalidades e regras (alinhadas à API)
+
+- Criar link.
+- Não permitir encurtamento **mal formatado**.
+- Não permitir encurtamento **já existente**.
+- Deletar link.
+- Obter URL original pelo encurtamento.
+- Listar todas as URLs cadastradas.
+- Incrementar quantidade de acessos de um link.
+- Baixar **CSV** com relatório dos links.
+
+## Rotas / páginas
+
+1. **`/`** — formulário de cadastro + listagem dos links.
+2. **`/:url-encurtada`** — lê o segmento dinâmico, consulta a API e redireciona / trata resposta.
+3. **404 / recurso não encontrado** — qualquer rota que não caiba nos padrões acima, ou encurtamento inexistente na API.
+
+## UX e front-end
+
+- **Responsivo**: desktop e mobile.
+- Boa **UX**: empty states, loading, desabilitar/bloquear ações conforme estado (submit, delete, etc.).
+- Bibliotecas **opcionais** recomendadas: React Query, React Hook Form, Zod — usar quando reduzirem complexidade e melhorarem DX.
+
+## Convenções de implementação
+
+- Preferir composição de componentes em `src/components/` (UI reutilizável vs. páginas).
+- Integração com API via `VITE_BACKEND_URL` (nunca hardcodar URL de produção).
+- Mensagens de erro e validação alinhadas às regras da API; feedback claro no formulário e na listagem.
+- Commits e PRs: mudanças focadas, texto claro em português ou inglês conforme o time.
+
+## O que evitar
+
+- Estilos “soltos” duplicando tokens já definidos no `@theme` sem necessidade.
+- Novas cores fora da paleta do Figma sem alinhar ao style guide.
+- Rotas ou fluxos que contornem as três páginas definidas sem decisão explícita de produto.
