@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  /* Cores do Figma (mesmos nomes do style guide) */
+  --color-blue-base: #2c46b1;
+  --color-blue-dark: #2c4091;
+  --color-white: #ffffff;
+  --color-gray-100: #f9f9fb;
+  --color-gray-200: #e4e6ec;
+  --color-gray-300: #cdcfd5;
+  --color-gray-400: #74798b;
+  --color-gray-500: #4d505c;
+  --color-gray-600: #1f2025;
+  --color-danger: #b12c4d;
+
+  --font-sans: 'Open Sans', system-ui, 'Segoe UI', sans-serif;
+
+  --text-xl: 1.5rem;
+  --text-xl--line-height: calc(2 / 1.5);
+  --text-lg: 1.125rem;
+  --text-lg--line-height: calc(1.5 / 1.125);
+  --text-md: 0.875rem;
+  --text-md--line-height: calc(1.125 / 0.875);
+  --text-sm: 0.75rem;
+  --text-sm--line-height: calc(1 / 0.75);
+  --text-xs: 0.625rem;
+  --text-xs--line-height: calc(0.875 / 0.625);
+}
+
+@layer base {
+  body {
+    @apply min-h-svh bg-white font-sans text-sm font-normal text-gray-600 antialiased;
+  }
+
+  #root {
+    @apply min-h-svh;
+  }
+}
