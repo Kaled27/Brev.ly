@@ -10,6 +10,7 @@ import {
   validatorCompiler,
 } from "fastify-type-provider-zod";
 import { enviarLinkRoute } from "./routes/enviar-link";
+import { listarLinksRoute } from "./routes/listar-links";
 
 const server = fastify();
 
@@ -44,6 +45,7 @@ server.register(fastifySwaggerUi, {
   routePrefix: "/docs",
 });
 
+server.register(listarLinksRoute);
 server.register(enviarLinkRoute);
 
 server.listen({ port: 3333, host: "0.0.0.0" }).then(() => {

@@ -19,7 +19,7 @@ export const enviarLinkRoute: FastifyPluginAsyncZod = async (server) => {
     "/enviar-link",
     {
       schema: {
-        tags: ["enviar-link"],
+        tags: ["links"],
         summary: "Encurtar link (link_encurtado = só o código, ex.: google).",
         body: z.object({
           link_original: z.string().url(),
