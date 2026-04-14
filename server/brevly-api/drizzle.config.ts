@@ -1,5 +1,5 @@
-import { env } from "@/infra/http/env";
 import type { Config } from "drizzle-kit";
+import { env } from "./src/infra/http/env";
 
 export default {
   dbCredentials: {

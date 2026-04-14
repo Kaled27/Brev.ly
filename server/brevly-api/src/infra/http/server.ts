@@ -1,3 +1,4 @@
+import { env } from "@/infra/http/env";
 import { fastifyCors } from "@fastify/cors";
 import { fastifyMultipart } from "@fastify/multipart";
 import { fastifySwagger } from "@fastify/swagger";
@@ -48,6 +49,6 @@ server.register(fastifySwaggerUi, {
 server.register(listarLinksRoute);
 server.register(enviarLinkRoute);
 
-server.listen({ port: 3333, host: "0.0.0.0" }).then(() => {
-  console.log("HTTP Server running!");
+server.listen({ port: env.PORT, host: "0.0.0.0" }).then(() => {
+  console.log(`HTTP Server running on port ${env.PORT}!`);
 });

@@ -1,6 +1,9 @@
 import { db } from "@/infra/db";
 import { schema } from "@/infra/db/schemas";
-import { resolvePagination } from "@/infra/services/pagination";
+import {
+  pagyResponseSchema,
+  resolvePagination,
+} from "@/infra/services/pagination";
 import { count, desc } from "drizzle-orm";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -8,6 +11,19 @@ import { z } from "zod";
 const listQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   page_size: z.coerce.number().int().min(1).max(100).default(10),
+});
+
+const linkListItemSchema = z.object({
+  link_encurtado: z.string().meta({ examples: ["meet"] }),
+  link_original: z
+    .string()
+    .url()
+    .meta({ examples: ["https://meet.google.com/lookup/abc-defg-hij"] }),
+  qtd_acessos: z
+    .number()
+    .int()
+    .nonnegative()
+    .meta({ examples: [1523] }),
 });
 
 export const listarLinksRoute: FastifyPluginAsyncZod = async (server) => {
@@ -20,19 +36,8 @@ export const listarLinksRoute: FastifyPluginAsyncZod = async (server) => {
         querystring: listQuerySchema,
         response: {
           200: z.object({
-            data: z.array(
-              z.object({
-                link_encurtado: z.string(),
-                link_original: z.string().url(),
-                qtd_acessos: z.number().int().nonnegative(),
-              }),
-            ),
-            pagy: z.object({
-              page: z.number().int().min(1),
-              page_size: z.number().int().min(1),
-              total: z.number().int().nonnegative(),
-              total_pages: z.number().int().nonnegative(),
-            }),
+            data: z.array(linkListItemSchema),
+            pagy: pagyResponseSchema,
           }),
         },
       },

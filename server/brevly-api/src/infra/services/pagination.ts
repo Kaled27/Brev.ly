@@ -1,3 +1,5 @@
+import z from "zod";
+
 export type PaginationParams = {
   page: number;
   page_size: number;
@@ -9,6 +11,30 @@ export type PaginationMeta = {
   total: number;
   total_pages: number;
 };
+
+export const pagyResponseSchema = z.object({
+  page: z
+    .number()
+    .int()
+    .min(1)
+    .meta({ examples: [1] }),
+  page_size: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .meta({ examples: [10] }),
+  total: z
+    .number()
+    .int()
+    .nonnegative()
+    .meta({ examples: [47] }),
+  total_pages: z
+    .number()
+    .int()
+    .nonnegative()
+    .meta({ examples: [5] }),
+});
 
 export function resolvePagination(
   params: PaginationParams,
