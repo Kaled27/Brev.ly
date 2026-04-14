@@ -13,7 +13,7 @@ interface InputDefaultProps
 
 const variantClasses: Record<InputVariant, string> = {
   "primary-default":
-    "min-w-[250px] max-h-[48px] px-4 py-3 bg-gray-100 text-gray-600 text-md rounded-lg border border-gray-200 ",
+    "min-w-[250px] max-h-[48px] px-4 py-3 text-gray-600 text-md rounded-lg border border-gray-200 ",
   "secondary-default":
     "max-w-[180px] max-h-[32px] px-3 py-2 bg-gray-200 text-gray-500 text-sm font-semibold rounded-sm border border-gray-300",
 };
