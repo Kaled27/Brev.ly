@@ -27,7 +27,7 @@ export const enviarLinkRoute: FastifyPluginAsyncZod = async (server) => {
             .string()
             .trim()
             .min(1)
-            .max(10)
+            .max(50)
             .regex(/^[a-zA-Z0-9_-]+$/)
             .transform((s) => s.toLowerCase()),
         }),

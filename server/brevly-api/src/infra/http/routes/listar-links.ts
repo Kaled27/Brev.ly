@@ -14,6 +14,7 @@ const listQuerySchema = z.object({
 });
 
 const linkListItemSchema = z.object({
+  id: z.string().uuidv7(),
   link_encurtado: z.string().meta({ examples: ["meet"] }),
   link_original: z
     .string()
@@ -55,6 +56,7 @@ export const listarLinksRoute: FastifyPluginAsyncZod = async (server) => {
 
       const rows = await db
         .select({
+          id: schema.link.id,
           link_encurtado: schema.link.short_url,
           link_original: schema.link.original_url,
           qtd_acessos: schema.link.qtd_visitas,
