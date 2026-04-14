@@ -6,7 +6,7 @@ type ButtonVariant =
   | "icon-default";
 
 interface ButtonDefaultProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   variant?: ButtonVariant;
   className?: string;
   disabled?: boolean;
@@ -16,9 +16,9 @@ const variantClasses: Record<ButtonVariant, string> = {
   "primary-default":
     "w-full p-4 bg-blue-base text-white text-md rounded-lg hover:bg-blue-dark",
   "secondary-default":
-    "max-w-[70px] max-h-[32px] px-3 py-2 bg-gray-200 text-gray-500 text-sm font-semibold rounded-sm hover:border hover:border-blue-base",
+    "max-w-[70px] max-h-[32px] px-3 py-2 bg-gray-200 text-gray-500 text-sm font-semibold rounded-sm border border-transparent hover:border hover:border-blue-base",
   "icon-default":
-    "p-2 rounded-sm bg-gray-200 text-gray-600 [&>svg]:w-4 [&>svg]:h-4 hover:border hover:border-blue-base",
+    "p-2 rounded-sm bg-gray-200 text-gray-600 [&>svg]:w-4 [&>svg]:h-4 border border-transparent hover:border hover:border-blue-base",
 };
 
 export const ButtonDefault: React.FC<ButtonDefaultProps> = ({
