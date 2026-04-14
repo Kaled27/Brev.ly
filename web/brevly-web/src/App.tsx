@@ -1,9 +1,34 @@
 import { DownloadSimpleIcon } from "@phosphor-icons/react";
+import { useState } from "react";
+import { z } from "zod";
 import { ButtonDefault } from "./components/ui/button/ButtonDefault";
 import { Card } from "./components/ui/card";
 import { InputDefault } from "./components/ui/input/InputDefault";
 
+const originalLinkSchema = z
+  .string()
+  .trim()
+  .url("Informe uma URL valida. Ex: https://www.exemplo.com.br");
+
 export default function App() {
+  const [originalLink, setOriginalLink] = useState("");
+  const [originalLinkError, setOriginalLinkError] = useState("");
+
+  const handleOriginalLinkChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const value = event.target.value;
+    setOriginalLink(value);
+
+    if (!value.trim()) {
+      setOriginalLinkError("");
+      return;
+    }
+
+    const validation = originalLinkSchema.safeParse(value);
+    setOriginalLinkError(validation.success ? "" : validation.error.issues[0].message);
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-start gap-4 bg-gray-200 px-3 pt-8 lg:px-8 lg:pt-10">
       <div className="flex w-full max-w-[1120px] flex-col gap-4">
@@ -25,6 +50,9 @@ export default function App() {
               variant="primary-default"
               label="link original"
               placeholder="www.exemplo.com.br"
+              value={originalLink}
+              onChange={handleOriginalLinkChange}
+              errorMessage={originalLinkError}
             />
             <InputDefault
               variant="primary-default"
