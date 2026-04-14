@@ -34,8 +34,10 @@ export const enviarLinkRoute: FastifyPluginAsyncZod = async (server) => {
         response: {
           201: z.object({
             message: z.string(),
-            link_encurtado: z.string(),
-            url_curta: z.string().url(),
+            data: z.object({
+              link_encurtado: z.string(),
+              url_curta: z.string().url(),
+            }),
           }),
           409: z.object({ message: z.string() }),
         },
@@ -53,7 +55,7 @@ export const enviarLinkRoute: FastifyPluginAsyncZod = async (server) => {
         if (isUniqueViolation(error)) {
           return reply
             .status(409)
-            .send({ message: "Este código já está em uso." });
+            .send({ message: "Esse link encurtado já está em uso." });
         }
         throw error;
       }
@@ -68,8 +70,10 @@ export const enviarLinkRoute: FastifyPluginAsyncZod = async (server) => {
 
       return reply.status(201).send({
         message: "Link encurtado com sucesso!",
-        link_encurtado,
-        url_curta,
+        data: {
+          link_encurtado,
+          url_curta,
+        },
       });
     },
   );
