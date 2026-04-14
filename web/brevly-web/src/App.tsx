@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, DownloadSimpleIcon, Trash } from "@phosphor-icons/react";
 import { useState } from "react";
 import { ButtonDefault } from "./components/ui/button/ButtonDefault";
 import { Card } from "./components/ui/card";
 import { InputDefault } from "./components/ui/input/InputDefault";
-import { mensagemDeErroDaUrl } from "./hooks/schema";
-import { buscarLinks } from "./lib/linksApi";
+import { esquemaUrlOriginal, mensagemDeErroDaUrl } from "./hooks/schema";
+import { buscarLinks, enviarLink } from "./lib/linksApi";
 
 const PREFIJO_LINK_ENCURTADO = "brev.ly/";
 
@@ -36,6 +36,26 @@ function slugApartirDoValorDigitado(valor: string): string {
   return valor;
 }
 
+/** Regra única: salvar só com ambos preenchidos, sem erro visível no URL e URL válida pelo schema. */
+function podeSalvarNovoLink(input: {
+  linkOriginal: string;
+  erroLinkOriginal: string;
+  slugEncurtado: string;
+}): boolean {
+  const url = input.linkOriginal.trim();
+  const slug = input.slugEncurtado.trim();
+
+  if (url.length === 0 || slug.length === 0) {
+    return false;
+  }
+
+  if (input.erroLinkOriginal !== "") {
+    return false;
+  }
+
+  return esquemaUrlOriginal.safeParse(url).success;
+}
+
 export default function App() {
   const [originalLink, setOriginalLink] = useState("");
   const [originalLinkError, setOriginalLinkError] = useState("");
@@ -55,10 +75,56 @@ export default function App() {
     setSlugEncurtado(slugApartirDoValorDigitado(event.target.value));
   };
 
+  const queryClient = useQueryClient();
+
   const consultaLinks = useQuery({
     queryKey: ["links"],
     queryFn: buscarLinks,
   });
+
+  const envioDeLink = useMutation({
+    mutationFn: enviarLink,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["links"] });
+      setOriginalLink("");
+      setOriginalLinkError("");
+      setSlugEncurtado("");
+    },
+  });
+
+  const salvarLinkHabilitado = podeSalvarNovoLink({
+    linkOriginal: originalLink,
+    erroLinkOriginal: originalLinkError,
+    slugEncurtado,
+  });
+
+  const aoSubmeterNovoLink = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const urlLimpa = originalLink.trim();
+    const slug = slugEncurtado.trim();
+
+    if (!podeSalvarNovoLink({
+      linkOriginal: originalLink,
+      erroLinkOriginal: originalLinkError,
+      slugEncurtado,
+    })) {
+      if (!urlLimpa) {
+        setOriginalLinkError("Informe a URL original.");
+        return;
+      }
+      const erroUrl = mensagemDeErroDaUrl(urlLimpa);
+      if (erroUrl) {
+        setOriginalLinkError(erroUrl);
+      }
+      return;
+    }
+
+    envioDeLink.mutate({
+      link_original: urlLimpa,
+      link_encurtado: slug,
+    });
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-start gap-4 bg-gray-200 px-3 pt-8 lg:px-8 lg:pt-10">
@@ -76,29 +142,40 @@ export default function App() {
             <Card.Header>
               <h2 className="text-lg font-bold">Novo link</h2>
             </Card.Header>
-            <Card.Content>
-              <InputDefault
-                variant="primary-default"
-                label="link original"
-                placeholder="https://www.exemplo.com.br"
-                value={originalLink}
-                onChange={aoAlterarLinkOriginal}
-                errorMessage={originalLinkError}
-              />
-              <InputDefault
-                variant="primary-default"
-                label="link encurtado"
-                placeholder={`${PREFIJO_LINK_ENCURTADO}meet`}
-                value={`${PREFIJO_LINK_ENCURTADO}${slugEncurtado}`}
-                onChange={aoAlterarLinkEncurtado}
-                autoComplete="off"
-              />
-            </Card.Content>
-            <Card.Footer>
-              <ButtonDefault variant="primary-default" disabled>
-                Salvar link
-              </ButtonDefault>
-            </Card.Footer>
+            <form onSubmit={aoSubmeterNovoLink} className="contents">
+              <Card.Content>
+                <InputDefault
+                  variant="primary-default"
+                  label="link original"
+                  placeholder="https://www.exemplo.com.br"
+                  value={originalLink}
+                  onChange={aoAlterarLinkOriginal}
+                  errorMessage={originalLinkError}
+                />
+                <InputDefault
+                  variant="primary-default"
+                  label="link encurtado"
+                  placeholder={`${PREFIJO_LINK_ENCURTADO}meet`}
+                  value={`${PREFIJO_LINK_ENCURTADO}${slugEncurtado}`}
+                  onChange={aoAlterarLinkEncurtado}
+                  autoComplete="off"
+                />
+                {envioDeLink.isError ? (
+                  <p className="text-danger text-xs">
+                    Não foi possível salvar o link. Tente novamente.
+                  </p>
+                ) : null}
+              </Card.Content>
+              <Card.Footer>
+                <ButtonDefault
+                  variant="primary-default"
+                  type="submit"
+                  disabled={!salvarLinkHabilitado || envioDeLink.isPending}
+                >
+                  {envioDeLink.isPending ? "Salvando…" : "Salvar link"}
+                </ButtonDefault>
+              </Card.Footer>
+            </form>
           </Card.Root>
 
           <Card.Root className="lg:max-w-none lg:flex-1">

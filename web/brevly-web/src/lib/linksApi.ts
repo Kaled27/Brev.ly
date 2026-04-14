@@ -23,3 +23,12 @@ export async function buscarLinks(): Promise<RespostaLinks> {
   const { data } = await apiClient.get<RespostaLinks>("links");
   return data;
 }
+
+export type CorpoEnviarLink = {
+  link_original: string;
+  link_encurtado: string;
+};
+
+export async function enviarLink(corpo: CorpoEnviarLink): Promise<void> {
+  await apiClient.post("enviar-link", corpo);
+}
