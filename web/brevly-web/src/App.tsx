@@ -1,32 +1,20 @@
 import { DownloadSimpleIcon } from "@phosphor-icons/react";
 import { useState } from "react";
-import { z } from "zod";
 import { ButtonDefault } from "./components/ui/button/ButtonDefault";
 import { Card } from "./components/ui/card";
 import { InputDefault } from "./components/ui/input/InputDefault";
-
-const originalLinkSchema = z
-  .string()
-  .trim()
-  .url("Informe uma URL valida. Ex: https://www.exemplo.com.br");
+import { mensagemDeErroDaUrl } from "./hooks/schema";
 
 export default function App() {
   const [originalLink, setOriginalLink] = useState("");
   const [originalLinkError, setOriginalLinkError] = useState("");
 
-  const handleOriginalLinkChange = (
+  const aoAlterarLinkOriginal = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const value = event.target.value;
-    setOriginalLink(value);
-
-    if (!value.trim()) {
-      setOriginalLinkError("");
-      return;
-    }
-
-    const validation = originalLinkSchema.safeParse(value);
-    setOriginalLinkError(validation.success ? "" : validation.error.issues[0].message);
+    const valor = event.target.value;
+    setOriginalLink(valor);
+    setOriginalLinkError(mensagemDeErroDaUrl(valor));
   };
 
   return (
@@ -49,9 +37,9 @@ export default function App() {
             <InputDefault
               variant="primary-default"
               label="link original"
-              placeholder="www.exemplo.com.br"
+              placeholder="https://www.exemplo.com.br"
               value={originalLink}
-              onChange={handleOriginalLinkChange}
+              onChange={aoAlterarLinkOriginal}
               errorMessage={originalLinkError}
             />
             <InputDefault
