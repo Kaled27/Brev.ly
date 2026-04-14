@@ -12,7 +12,7 @@ export const CardRoot: React.FC<CardBaseProps> = ({
 }) => {
   return (
     <div
-      className={`w-full max-w-[380px] rounded-lg bg-gray-100 p-6 ${className}`.trim()}
+      className={`w-full lg:max-w-[380px] rounded-lg bg-gray-100 p-6 ${className}`.trim()}
       {...props}
     >
       {children}
