@@ -19,8 +19,21 @@ export type RespostaLinks = {
   pagy: Pagy;
 };
 
-export async function buscarLinks(): Promise<RespostaLinks> {
-  const { data } = await apiClient.get<RespostaLinks>("links");
+/** Itens por página na listagem (alinha com scroll infinito no app). */
+export const LINKS_PAGE_SIZE = 5;
+
+export type BuscarLinksParams = {
+  page: number;
+  page_size?: number;
+};
+
+export async function buscarLinks(
+  params: BuscarLinksParams,
+): Promise<RespostaLinks> {
+  const page_size = params.page_size ?? LINKS_PAGE_SIZE;
+  const { data } = await apiClient.get<RespostaLinks>("links", {
+    params: { page: params.page, page_size },
+  });
   return data;
 }
 
