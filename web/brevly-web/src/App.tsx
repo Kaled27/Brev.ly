@@ -30,6 +30,12 @@ const DURACAO_ANIM_ENTRADA_LINK_MS = 580;
 
 const CHAVE_CONSULTA_LINKS = ["links", LINKS_PAGE_SIZE] as const;
 
+/** Usa o host/porta em que o front está aberto (ex.: http://localhost:5173). */
+function montarUrlEncurtadaParaCopiar(slug: string): string {
+  const limpo = slug.replace(/^\/+/, "");
+  return `${window.location.origin}/${limpo}`;
+}
+
 function slugApartirDoValorDigitado(valor: string): string {
   const pl = PREFIJO_LINK_ENCURTADO.toLowerCase();
   const vl = valor.toLowerCase();
@@ -241,6 +247,18 @@ export default function App() {
     slugEncurtado,
   });
 
+  const aoCopiarLinkEncurtado = async (item: LinkItem) => {
+    const url = montarUrlEncurtadaParaCopiar(item.link_encurtado);
+    try {
+      await navigator.clipboard.writeText(url);
+      showSuccess("Link copiado para a área de transferência.");
+    } catch {
+      showError(
+        "Não foi possível copiar o link. Verifique as permissões do navegador.",
+      );
+    }
+  };
+
   const aoSubmeterNovoLink = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -318,12 +336,9 @@ export default function App() {
           </Card.Root>
 
           <Card.Root className="lg:max-w-none lg:flex-1">
-            {(consultaLinks.isFetching &&
-              !consultaLinks.isPending &&
+            {((consultaLinks.isFetching &&
               !consultaLinks.isFetchingNextPage) ||
-            exclusaoDeLink.isPending ? (
-              <LoadingBar />
-            ) : null}
+              exclusaoDeLink.isPending) && <LoadingBar />}
             <Card.Header className="flex flex-row items-center justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="text-lg text-gray-600 font-bold">Meus links</h2>
@@ -386,7 +401,7 @@ export default function App() {
                                 target="_blank"
                                 className="text-blue-base text-md font-semibold"
                               >
-                                brev.ly/{item.link_encurtado}
+                                {window.location.origin}/{item.link_encurtado}
                               </a>
                               <p className="text-gray-500 text-sm font-normal wrap-break-word">
                                 {item.link_original}
@@ -396,7 +411,13 @@ export default function App() {
                               <span className="px-4 text-sm font-normal">
                                 {item.qtd_acessos} acessos
                               </span>
-                              <ButtonDefault variant="icon-default" className="gap-2">
+                              <ButtonDefault
+                                variant="icon-default"
+                                className="gap-2"
+                                type="button"
+                                onClick={() => void aoCopiarLinkEncurtado(item)}
+                                title="Copiar link encurtado"
+                              >
                                 <Copy size={16} />
                               </ButtonDefault>
                               <ButtonDefault
