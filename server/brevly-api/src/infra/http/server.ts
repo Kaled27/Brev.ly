@@ -13,6 +13,7 @@ import {
 import { deletarLinkRoute } from "./routes/deletar-link";
 import { enviarLinkRoute } from "./routes/enviar-link";
 import { listarLinksRoute } from "./routes/listar-links";
+import { obterLinkOriginalRoute } from "./routes/obter-link-original";
 
 const server = fastify();
 
@@ -48,6 +49,7 @@ server.register(fastifySwaggerUi, {
 });
 
 server.register(listarLinksRoute);
+server.register(obterLinkOriginalRoute);
 server.register(enviarLinkRoute);
 server.register(deletarLinkRoute);
 
