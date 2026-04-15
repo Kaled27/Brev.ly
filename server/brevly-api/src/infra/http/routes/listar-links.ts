@@ -4,7 +4,7 @@ import {
   pagyResponseSchema,
   resolvePagination,
 } from "@/infra/services/pagination";
-import { count, desc } from "drizzle-orm";
+import { count, desc, isNull } from "drizzle-orm";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 
@@ -46,7 +46,10 @@ export const listarLinksRoute: FastifyPluginAsyncZod = async (server) => {
     async (request, reply) => {
       const { page, page_size: pageSize } = request.query;
 
-      const [totalRow] = await db.select({ total: count() }).from(schema.link);
+      const [totalRow] = await db
+        .select({ total: count() })
+        .from(schema.link)
+        .where(isNull(schema.link.deleted_at));
 
       const total = Number(totalRow?.total ?? 0);
       const { offset, meta } = resolvePagination(
@@ -62,6 +65,7 @@ export const listarLinksRoute: FastifyPluginAsyncZod = async (server) => {
           qtd_acessos: schema.link.qtd_visitas,
         })
         .from(schema.link)
+        .where(isNull(schema.link.deleted_at))
         .orderBy(desc(schema.link.id))
         .limit(pageSize)
         .offset(offset);

@@ -10,4 +10,5 @@ export const link = pgTable("links", {
   qtd_visitas: integer("qtd_visitas").notNull().default(0),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at").notNull().defaultNow(),
+  deleted_at: timestamp("deleted_at"),
 });

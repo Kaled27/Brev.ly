@@ -8,6 +8,13 @@
       "when": 1776194895917,
       "tag": "0000_square_magma",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776280348462,
+      "tag": "0001_useful_annihilus",
+      "breakpoints": true
     }
   ]
 }

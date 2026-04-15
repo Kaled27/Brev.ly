@@ -10,6 +10,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { deletarLinkRoute } from "./routes/deletar-link";
 import { enviarLinkRoute } from "./routes/enviar-link";
 import { listarLinksRoute } from "./routes/listar-links";
 
@@ -48,6 +49,7 @@ server.register(fastifySwaggerUi, {
 
 server.register(listarLinksRoute);
 server.register(enviarLinkRoute);
+server.register(deletarLinkRoute);
 
 server.listen({ port: env.PORT, host: "0.0.0.0" }).then(() => {
   console.log(`HTTP Server running on port ${env.PORT}!`);
