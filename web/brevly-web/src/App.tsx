@@ -4,6 +4,8 @@ import { useState } from "react";
 import { ButtonDefault } from "./components/ui/button/ButtonDefault";
 import { Card } from "./components/ui/card";
 import { InputDefault } from "./components/ui/input/InputDefault";
+import { LoadingBar } from "./components/ui/loading/LoadingBar";
+import { Spinner } from "./components/ui/loading/Spinner";
 import { ModalConfirmacao } from "./components/ui/modal/ModalConfirmacao";
 import { esquemaUrlOriginal, mensagemDeErroDaUrl } from "./hooks/schema";
 import { buscarLinks, deletarLink, enviarLink, type LinkItem } from "./lib/linksApi";
@@ -161,6 +163,7 @@ export default function App() {
 
         <div className="flex w-full flex-col items-center gap-4 lg:flex-row lg:items-start">
           <Card.Root className="shrink-0">
+            {envioDeLink.isPending && <LoadingBar />}
             <Card.Header>
               <h2 className="text-lg font-bold">Novo link</h2>
             </Card.Header>
@@ -201,6 +204,7 @@ export default function App() {
           </Card.Root>
 
           <Card.Root className="lg:max-w-none lg:flex-1">
+            {(consultaLinks.isFetching || exclusaoDeLink.isPending) && <LoadingBar />}
             <Card.Header className="flex flex-row items-center justify-between">
               <h2 className="text-lg text-gray-600 font-bold">Meus links</h2>
               <ButtonDefault variant="icon-default" className="gap-2" disabled>
@@ -211,8 +215,9 @@ export default function App() {
             <div className="my-4 h-px w-full bg-gray-200" />
             <Card.Content>
               {consultaLinks.isPending ? (
-                <div className="py-6 text-center text-sm text-gray-500">
-                  Carregando links…
+                <div className="flex flex-col items-center justify-center gap-3 py-8">
+                  <Spinner size={40} />
+                  <span className="text-sm text-gray-400">Carregando links…</span>
                 </div>
               ) : consultaLinks.isError ? (
                 <div className="py-6 text-center text-sm text-gray-500">
