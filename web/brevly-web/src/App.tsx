@@ -4,7 +4,12 @@ import {
   useQueryClient,
   type InfiniteData,
 } from "@tanstack/react-query";
-import { Copy, DownloadSimpleIcon, Trash } from "@phosphor-icons/react";
+import {
+  CircleNotch,
+  Copy,
+  DownloadSimpleIcon,
+  Trash,
+} from "@phosphor-icons/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { ButtonDefault } from "./components/ui/button/ButtonDefault";
 import { Card } from "./components/ui/card";
@@ -16,6 +21,7 @@ import { ToastContainer } from "./components/ui/toast/ToastContainer";
 import { esquemaUrlOriginal, mensagemDeErroDaUrl } from "./hooks/schema";
 import { useToast } from "./hooks/useToast";
 import {
+  baixarLinksCsv,
   buscarLinks,
   deletarLink,
   enviarLink,
@@ -89,6 +95,7 @@ export default function App() {
   const [idsLinkEntradaAnimada, setIdsLinkEntradaAnimada] = useState<
     Set<string>
   >(() => new Set());
+  const [exportandoCsv, setExportandoCsv] = useState(false);
   const { toasts, dismiss, showSuccess, showError } = useToast();
 
   const aoAlterarLinkOriginal = (
@@ -242,6 +249,20 @@ export default function App() {
     slugEncurtado,
   });
 
+  const semLinksCadastrados = totalLinks === 0 && itensLinks.length === 0;
+
+  const aoBaixarCsv = async () => {
+    if (semLinksCadastrados || exportandoCsv || consultaLinks.isPending) return;
+    setExportandoCsv(true);
+    try {
+      await baixarLinksCsv();
+    } catch {
+      showError("Não foi possível baixar o CSV. Tente novamente.");
+    } finally {
+      setExportandoCsv(false);
+    }
+  };
+
   const aoCopiarLinkEncurtado = async (item: LinkItem) => {
     const url = urlEncurtadaNoOriginAtual(item.link_encurtado);
     try {
@@ -341,9 +362,28 @@ export default function App() {
                   {LINKS_PAGE_SIZE} por página · role a lista para carregar o restante
                 </p>
               </div>
-              <ButtonDefault variant="icon-default" className="gap-2 shrink-0" disabled>
-                <DownloadSimpleIcon size={16} />
-                Baixar CSV
+              <ButtonDefault
+                variant="icon-default"
+                className="gap-2 shrink-0"
+                type="button"
+                disabled={
+                  semLinksCadastrados ||
+                  consultaLinks.isPending ||
+                  exportandoCsv
+                }
+                onClick={() => void aoBaixarCsv()}
+              >
+                {exportandoCsv ? (
+                  <>
+                    <CircleNotch size={16} className="animate-spin" />
+                    Baixando…
+                  </>
+                ) : (
+                  <>
+                    <DownloadSimpleIcon size={16} />
+                    Baixar CSV
+                  </>
+                )}
               </ButtonDefault>
             </Card.Header>
             <div className="my-4 h-px w-full bg-gray-200" />

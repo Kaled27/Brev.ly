@@ -1,4 +1,6 @@
+import { uuidv7 } from "uuidv7";
 import { apiClient } from "./apiClient";
+
 
 export type LinkItem = {
   id: string;
@@ -62,4 +64,38 @@ export async function buscarUrlOriginalPorCodigo(
     `links/codigo/${encodeURIComponent(linkEncurtado)}`,
   );
   return data;
+}
+
+
+/** Sempre retorna um nome tipo csv-<uuidv7>.csv */
+function nomeArquivoDoContentDisposition(_header: string | undefined): string {
+  return `csv-${uuidv7()}.csv`;
+}
+
+/** Baixa o CSV de links; dispara o download no navegador. */
+export async function baixarLinksCsv(): Promise<void> {
+  const response = await apiClient.get<Blob>("links/export.csv", {
+    responseType: "blob",
+  });
+
+  const dispoRaw = response.headers["content-disposition"];
+  const dispo =
+    typeof dispoRaw === "string"
+      ? dispoRaw
+      : Array.isArray(dispoRaw)
+        ? dispoRaw[0]
+        : undefined;
+
+  const filename = nomeArquivoDoContentDisposition(dispo);
+  const blob = response.data;
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
