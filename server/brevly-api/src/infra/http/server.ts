@@ -12,6 +12,7 @@ import {
 } from "fastify-type-provider-zod";
 import { deletarLinkRoute } from "./routes/deletar-link";
 import { enviarLinkRoute } from "./routes/enviar-link";
+import { exportarLinksCsvRoute } from "./routes/exportar-links-csv";
 import { listarLinksRoute } from "./routes/listar-links";
 import { obterLinkOriginalRoute } from "./routes/obter-link-original";
 
@@ -52,6 +53,7 @@ server.register(fastifySwaggerUi, {
 });
 
 server.register(listarLinksRoute);
+server.register(exportarLinksCsvRoute);
 server.register(obterLinkOriginalRoute);
 server.register(enviarLinkRoute);
 server.register(deletarLinkRoute);
