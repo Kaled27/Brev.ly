@@ -1,6 +1,7 @@
 import { db } from "@/infra/db";
 import { schema } from "@/infra/db/schemas";
 import { env } from "@/infra/http/env";
+import { and, eq, isNull } from "drizzle-orm";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 
@@ -45,6 +46,23 @@ export const enviarLinkRoute: FastifyPluginAsyncZod = async (server) => {
     },
     async (request, reply) => {
       const { link_original, link_encurtado } = request.body;
+
+      const [emUso] = await db
+        .select({ id: schema.link.id })
+        .from(schema.link)
+        .where(
+          and(
+            eq(schema.link.short_url, link_encurtado),
+            isNull(schema.link.deleted_at),
+          ),
+        )
+        .limit(1);
+
+      if (emUso) {
+        return reply
+          .status(409)
+          .send({ message: "Esse link encurtado já está em uso." });
+      }
 
       try {
         await db.insert(schema.link).values({
