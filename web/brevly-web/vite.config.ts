@@ -11,4 +11,8 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
   ],
   appType: "spa",
+  server: {
+    host: true,
+    port: 5173,
+  },
 })

@@ -359,7 +359,7 @@ export default function App() {
               <div className="min-w-0">
                 <h2 className="text-lg text-gray-600 font-bold">Meus links</h2>
                 <p className="mt-0.5 text-xs text-gray-400">
-                  {LINKS_PAGE_SIZE} por página · role a lista para carregar o restante
+                  Role a lista para carregar o restante
                 </p>
               </div>
               <ButtonDefault
