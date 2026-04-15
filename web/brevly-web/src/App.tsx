@@ -4,8 +4,9 @@ import { useState } from "react";
 import { ButtonDefault } from "./components/ui/button/ButtonDefault";
 import { Card } from "./components/ui/card";
 import { InputDefault } from "./components/ui/input/InputDefault";
+import { ModalConfirmacao } from "./components/ui/modal/ModalConfirmacao";
 import { esquemaUrlOriginal, mensagemDeErroDaUrl } from "./hooks/schema";
-import { buscarLinks, enviarLink } from "./lib/linksApi";
+import { buscarLinks, deletarLink, enviarLink, type LinkItem } from "./lib/linksApi";
 
 const PREFIJO_LINK_ENCURTADO = "brev.ly/";
 
@@ -60,6 +61,7 @@ export default function App() {
   const [originalLink, setOriginalLink] = useState("");
   const [originalLinkError, setOriginalLinkError] = useState("");
   const [slugEncurtado, setSlugEncurtado] = useState("");
+  const [linkParaExcluir, setLinkParaExcluir] = useState<LinkItem | null>(null);
 
   const aoAlterarLinkOriginal = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -91,6 +93,26 @@ export default function App() {
       setSlugEncurtado("");
     },
   });
+
+  const exclusaoDeLink = useMutation({
+    mutationFn: deletarLink,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["links"] });
+      setLinkParaExcluir(null);
+    },
+  });
+
+  const confirmarExclusao = () => {
+    if (linkParaExcluir) {
+      exclusaoDeLink.mutate(linkParaExcluir.id);
+    }
+  };
+
+  const cancelarExclusao = () => {
+    if (!exclusaoDeLink.isPending) {
+      setLinkParaExcluir(null);
+    }
+  };
 
   const salvarLinkHabilitado = podeSalvarNovoLink({
     linkOriginal: originalLink,
@@ -211,7 +233,7 @@ export default function App() {
                       className="flex items-center justify-between"
                     >
                       <div>
-                        <a href={`${item.link_original}`} className="text-blue-base text-md font-semibold">
+                        <a href={`${item.link_original}`} target="_blank" className="text-blue-base text-md font-semibold">
                           brev.ly/{item.link_encurtado}
                         </a>
                         <p className="text-gray-500 text-sm font-normal">
@@ -223,7 +245,11 @@ export default function App() {
                         <ButtonDefault variant="icon-default" className="gap-2">
                           <Copy size={16} />
                         </ButtonDefault>
-                        <ButtonDefault variant="icon-default" className="gap-2">
+                        <ButtonDefault
+                          variant="icon-default"
+                          className="gap-2"
+                          onClick={() => setLinkParaExcluir(item)}
+                        >
                           <Trash size={16} />
                         </ButtonDefault>
                       </div>
@@ -235,6 +261,21 @@ export default function App() {
           </Card.Root>
         </div>
       </div>
+
+      <ModalConfirmacao
+        aberto={linkParaExcluir !== null}
+        titulo="Excluir link"
+        mensagem={
+          linkParaExcluir
+            ? `Tem certeza que deseja excluir o link "brev.ly/${linkParaExcluir.link_encurtado}"?`
+            : ""
+        }
+        textoBotaoConfirmar="Excluir"
+        textoBotaoCancelar="Cancelar"
+        aoConfirmar={confirmarExclusao}
+        aoCancelar={cancelarExclusao}
+        carregando={exclusaoDeLink.isPending}
+      />
     </div>
   );
 }

@@ -32,3 +32,7 @@ export type CorpoEnviarLink = {
 export async function enviarLink(corpo: CorpoEnviarLink): Promise<void> {
   await apiClient.post("enviar-link", corpo);
 }
+
+export async function deletarLink(id: string): Promise<void> {
+  await apiClient.delete(`links/${id}`);
+}
