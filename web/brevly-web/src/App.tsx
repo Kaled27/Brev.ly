@@ -23,18 +23,13 @@ import {
   type LinkItem,
   type RespostaLinks,
 } from "./lib/linksApi";
+import { urlEncurtadaNoOriginAtual } from "./lib/shortLinkUrl";
 
 const PREFIJO_LINK_ENCURTADO = "brev.ly/";
 const DURACAO_ANIM_EXCLUSAO_MS = 720;
 const DURACAO_ANIM_ENTRADA_LINK_MS = 580;
 
 const CHAVE_CONSULTA_LINKS = ["links", LINKS_PAGE_SIZE] as const;
-
-/** Usa o host/porta em que o front está aberto (ex.: http://localhost:5173). */
-function montarUrlEncurtadaParaCopiar(slug: string): string {
-  const limpo = slug.replace(/^\/+/, "");
-  return `${window.location.origin}/${limpo}`;
-}
 
 function slugApartirDoValorDigitado(valor: string): string {
   const pl = PREFIJO_LINK_ENCURTADO.toLowerCase();
@@ -248,7 +243,7 @@ export default function App() {
   });
 
   const aoCopiarLinkEncurtado = async (item: LinkItem) => {
-    const url = montarUrlEncurtadaParaCopiar(item.link_encurtado);
+    const url = urlEncurtadaNoOriginAtual(item.link_encurtado);
     try {
       await navigator.clipboard.writeText(url);
       showSuccess("Link copiado para a área de transferência.");
@@ -384,58 +379,64 @@ export default function App() {
                     className="max-h-[min(52vh,380px)] overflow-y-auto overflow-x-hidden overscroll-contain rounded-lg pr-0.5"
                   >
                     <div className="flex flex-col gap-4 overflow-x-hidden pb-1">
-                      {itensLinks.map((item) => (
-                        <Fragment key={item.id}>
-                          <div
-                            className={`flex items-center justify-between ${
-                              item.id === idLinkEmExclusaoAnimada
-                                ? "link-exit-to-trash"
-                                : idsLinkEntradaAnimada.has(item.id)
-                                  ? "link-enter-highlight"
-                                  : ""
-                            }`}
-                          >
-                            <div className="min-w-0 flex-1 pr-2">
-                              <a
-                                href={`${item.link_original}`}
-                                target="_blank"
-                                className="text-blue-base text-md font-semibold"
-                              >
-                                {window.location.origin}/{item.link_encurtado}
-                              </a>
-                              <p className="text-gray-500 text-sm font-normal wrap-break-word">
-                                {item.link_original}
-                              </p>
+                      {itensLinks.map((item) => {
+                        const urlAtalho = urlEncurtadaNoOriginAtual(
+                          item.link_encurtado,
+                        );
+                        return (
+                          <Fragment key={item.id}>
+                            <div
+                              className={`flex items-center justify-between ${
+                                item.id === idLinkEmExclusaoAnimada
+                                  ? "link-exit-to-trash"
+                                  : idsLinkEntradaAnimada.has(item.id)
+                                    ? "link-enter-highlight"
+                                    : ""
+                              }`}
+                            >
+                              <div className="min-w-0 flex-1 pr-2">
+                                <a
+                                  href={urlAtalho}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-base text-md font-semibold"
+                                >
+                                  {urlAtalho.replace(/^https?:\/\//, "")}
+                                </a>
+                                <p className="text-gray-500 text-sm font-normal wrap-break-word">
+                                  {item.link_original}
+                                </p>
+                              </div>
+                              <div className="flex shrink-0 items-center gap-2">
+                                <span className="px-4 text-sm font-normal">
+                                  {item.qtd_acessos} acessos
+                                </span>
+                                <ButtonDefault
+                                  variant="icon-default"
+                                  className="gap-2"
+                                  type="button"
+                                  onClick={() => void aoCopiarLinkEncurtado(item)}
+                                  title="Copiar link encurtado"
+                                >
+                                  <Copy size={16} />
+                                </ButtonDefault>
+                                <ButtonDefault
+                                  variant="icon-default"
+                                  className="gap-2"
+                                  disabled={
+                                    exclusaoDeLink.isPending ||
+                                    idLinkEmExclusaoAnimada !== null
+                                  }
+                                  onClick={() => setLinkParaExcluir(item)}
+                                >
+                                  <Trash size={16} />
+                                </ButtonDefault>
+                              </div>
                             </div>
-                            <div className="flex shrink-0 items-center gap-2">
-                              <span className="px-4 text-sm font-normal">
-                                {item.qtd_acessos} acessos
-                              </span>
-                              <ButtonDefault
-                                variant="icon-default"
-                                className="gap-2"
-                                type="button"
-                                onClick={() => void aoCopiarLinkEncurtado(item)}
-                                title="Copiar link encurtado"
-                              >
-                                <Copy size={16} />
-                              </ButtonDefault>
-                              <ButtonDefault
-                                variant="icon-default"
-                                className="gap-2"
-                                disabled={
-                                  exclusaoDeLink.isPending ||
-                                  idLinkEmExclusaoAnimada !== null
-                                }
-                                onClick={() => setLinkParaExcluir(item)}
-                              >
-                                <Trash size={16} />
-                              </ButtonDefault>
-                            </div>
-                          </div>
-                          <div className="my-1 h-px w-full bg-gray-200" />
-                        </Fragment>
-                      ))}
+                            <div className="my-1 h-px w-full bg-gray-200" />
+                          </Fragment>
+                        );
+                      })}
                     </div>
                     {consultaLinks.hasNextPage ? (
                       <div

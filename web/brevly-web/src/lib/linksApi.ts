@@ -49,3 +49,17 @@ export async function enviarLink(corpo: CorpoEnviarLink): Promise<void> {
 export async function deletarLink(id: string): Promise<void> {
   await apiClient.delete(`links/${id}`);
 }
+
+export type RespostaLinkPorCodigo = {
+  link_encurtado: string;
+  link_original: string;
+};
+
+export async function buscarUrlOriginalPorCodigo(
+  linkEncurtado: string,
+): Promise<RespostaLinkPorCodigo> {
+  const { data } = await apiClient.get<RespostaLinkPorCodigo>(
+    `links/codigo/${encodeURIComponent(linkEncurtado)}`,
+  );
+  return data;
+}
