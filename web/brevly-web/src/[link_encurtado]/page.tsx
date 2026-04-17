@@ -1,20 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { Card } from "../components/ui/card";
 import { buscarUrlOriginalPorCodigo } from "../lib/linksApi";
 
 /** Pausa curta para o usuário ver a tela de redirecionamento antes de sair. */
 const ATRASO_REDIRECT_MS = 1200;
 
+/** Alinha com slugs seguros na URL; evita consulta quando o segmento é inválido. */
+const CODIGO_LINK_ENCURTADO_VALIDO = /^[a-zA-Z0-9_-]+$/;
+
 export function Page() {
   const { linkEncurtado } = useParams<{ linkEncurtado: string }>();
   const codigo = linkEncurtado?.trim() ?? "";
+  const codigoValido =
+    codigo.length > 0 && CODIGO_LINK_ENCURTADO_VALIDO.test(codigo);
 
   const consulta = useQuery({
     queryKey: ["link-por-codigo", codigo],
     queryFn: () => buscarUrlOriginalPorCodigo(codigo),
-    enabled: codigo.length > 0,
+    enabled: codigoValido,
     retry: false,
   });
 
@@ -29,43 +34,12 @@ export function Page() {
     return () => window.clearTimeout(id);
   }, [consulta.data?.link_original]);
 
-  if (!codigo) {
-    return (
-      <div className="fixed flex min-h-screen min-w-full items-center justify-center bg-gray-200">
-        <Card.Root className="flex max-w-md items-center justify-center lg:min-h-[200px]">
-          <Card.Content className="flex w-full flex-col items-center gap-4 p-8 text-center">
-            <p className="text-sm text-gray-600">Código do link inválido.</p>
-            <Link
-              to="/"
-              className="text-sm font-semibold text-blue-base underline hover:text-blue-dark"
-            >
-              Voltar ao início
-            </Link>
-          </Card.Content>
-        </Card.Root>
-      </div>
-    );
+  if (!codigoValido) {
+    return <Navigate to="/404" replace />;
   }
 
   if (consulta.isError) {
-    return (
-      <div className="fixed flex min-h-screen min-w-full items-center justify-center bg-gray-200">
-        <Card.Root className="flex max-w-md items-center justify-center lg:min-h-[200px]">
-          <Card.Content className="flex w-full flex-col items-center gap-4 p-8 text-center">
-            <p className="text-sm text-gray-600">
-              Não encontramos esse link. Ele pode ter sido removido ou o código está
-              incorreto.
-            </p>
-            <Link
-              to="/"
-              className="text-sm font-semibold text-blue-base underline hover:text-blue-dark"
-            >
-              Voltar ao início
-            </Link>
-          </Card.Content>
-        </Card.Root>
-      </div>
-    );
+    return <Navigate to="/404" replace />;
   }
 
   const urlDestino = consulta.data?.link_original;
